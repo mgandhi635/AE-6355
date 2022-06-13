@@ -4,13 +4,6 @@ import pandas as pd
 gamma_data = pd.read_excel('Curve_fit_constants_for_class_r2.xlsx', skiprows=1, sheet_name='h=h(p,rho)')
 temp_data = pd.read_excel('Curve_fit_constants_for_class_r2.xlsx', skiprows=1, sheet_name='T=T(P,rho)')
 
-# xl = pd.ExcelFile('Curve_fit_constants_for_class_r2.xlsx')
-# df = xl.parse(skiprows=1)
-
-# print(gamma_data)
-# print(temp_data)
-
-
 class GammaTildeCurveFit:
     def __init__(self):
         self.data = gamma_data

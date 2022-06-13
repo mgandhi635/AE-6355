@@ -187,9 +187,14 @@ T_2_c = temp_curve.fit(p_2_c, rho_2_c)[0]
 pressure_ratio_c = p_2_c / p_1
 density_ratio_c = rho_2_c / rho_1
 temperature_ratio_c = T_2_c / T_1
+
+# Compute number density for verification
+number_density = compute_number_density(p_2_c, T_2_c)
+print(f"Number density downstream normal shock: {number_density}")
+
 print(f"Pressure ratio across normal shock: {pressure_ratio_c}")
 
 print(f"Density ratio across normal shock: {density_ratio_c}")
-# print(f"Epsilon across normal shock: {epsilon_b}")
 
 print(f"Temperature ratio across normal shock: {temperature_ratio_c}")
+print(f"Epsilon across normal shock: {epsilon_c}")

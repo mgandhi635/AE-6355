@@ -1,5 +1,14 @@
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+
+mpl.rcParams['text.usetex'] = True
+
+# # It's also possible to use the reduced notation by directly setting font.family:
+# plt.rcParams.update({
+#   "text.usetex": True,
+#   "font.family": "Helvetica"
+# })
 
 # Compute cpmax(1-ep)
 # Find ep of a general blunted cone at an angle of attack, and then get Cl and Cd
@@ -45,7 +54,7 @@ def cp_vec_class(xi, delta, alpha):
 
     CN = (cpmax - epsilon) * (1 - xi**2 * np.cos(delta)**2) * (np.cos(delta)**2 * np.sin(alpha) * np.cos(alpha))
 
-    CP = np.sqrt(CA**2 + CN**2)
+    CP = (cpmax - epsilon)*(np.cos(alpha)*np.sin(delta) - np.sin(alpha)*np.sin(np.pi/2) * (np.cos(delta)))**2
     CL = CN*np.cos(alpha) - CA*np.sin(alpha)
     CD = CN*np.sin(alpha) + CA*np.cos(alpha)
     return CP, CL, CD
@@ -104,8 +113,8 @@ def cp_estimate(xi, delta, alpha):
 data = {"A": (70, 2.65, 0.6635),
          "B": (60, 0.827, 0.23),
          "C": (45, 0.35, 0.0875),
-         "D": (20, 10, 1),
-         "E": (20, 9, 2.5)}
+         "D": (20, 10, 1)}
+         # "E": (20, 9, 2.5)}
         # "E1": (15, 10, 1),
         # "E2": (30, 0.35, 0.0875),
         # "E3": (15, 9, 1),
@@ -116,7 +125,7 @@ plt.figure(2)
 plt.ylim([-.50, 0.50])
 plt.figure(3)
 
-titles = ["alpha vs Cp", "alpha vs Cl", "alpha vs Cd"]
+titles = [r"$\alpha$ vs $C_p$ at $\omega=90^{\circ}$", r"$\alpha$ vs $C_l$", r"$\alpha$ vs $C_d$"]
 
 for case, value in data.items():
     cone_angle = np.radians(value[0])
@@ -125,7 +134,7 @@ for case, value in data.items():
     xi = rn / rc
     cp, cl, cd = cp_vec_class(xi, cone_angle, alpha_range_rad)
 
-    label = f"{case}: dc = {value[0]} deg,  xi = {xi:.2f})"
+    label = case + r": $\delta_c$ = " + str(value[0]) + r"$^{\circ}$,  $\xi$ = " + f"{xi:.2f}"
 
     plt.figure(1)
     plt.plot(alpha_range_deg, cp, label=label,linewidth=3, alpha=0.5)
@@ -140,7 +149,7 @@ for i in plt.get_fignums():
     plt.figure(i)
     plt.legend(bbox_to_anchor=(0.75, 1.0), loc=2, borderaxespad=-4)
     plt.grid()
-    plt.xlabel("Angle of Attack (deg)")
+    plt.xlabel(r"Angle of Attack ($^{\circ}$)")
     plt.ylabel("Coefficient")
     plt.title(titles[i-1])
 plt.show()

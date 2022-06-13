@@ -1,7 +1,7 @@
 import numpy as np
 import scipy as sp
 import scipy.optimize
-from high_temp_shock_curve_fit import GammaTildeCurveFit, HighTempCurveFit
+from high_temp_shock_curve_fit import GammaTildeCurveFit, HighTempCurveFit, compute_number_density, compute_curve_fit_enthaply
 
 gamma_air = 1.4  # gas constant air
 shock_angle = np.radians(90)
@@ -130,14 +130,6 @@ print("\nPART C:")
 #initialize the curve fits
 gamma_curve = GammaTildeCurveFit()
 temp_curve = HighTempCurveFit()
-
-
-def compute_number_density(p_2, T_2):
-    return (p_2 / 101325.) * (273.15 / T_2)  # Pa and Kelvin
-
-
-def compute_curve_fit_enthaply(p_2, rho_2, gamma_tilde):
-    return p_2 / rho_2 * (gamma_tilde / (gamma_tilde - 1))
 
 
 cp_air_200K = 1.0025 # specific heat of air at 200 Kelvin in kJ / (kg K)

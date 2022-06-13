@@ -4,6 +4,15 @@ import pandas as pd
 gamma_data = pd.read_excel('Curve_fit_constants_for_class_r2.xlsx', skiprows=1, sheet_name='h=h(p,rho)')
 temp_data = pd.read_excel('Curve_fit_constants_for_class_r2.xlsx', skiprows=1, sheet_name='T=T(P,rho)')
 
+
+def compute_number_density(p_2, T_2):
+    return (p_2 / 101325.) * (273.15 / T_2)  # Pa and Kelvin
+
+
+def compute_curve_fit_enthaply(p_2, rho_2, gamma_tilde):
+    return p_2 / rho_2 * (gamma_tilde / (gamma_tilde - 1))
+
+
 class GammaTildeCurveFit:
     def __init__(self):
         self.data = gamma_data

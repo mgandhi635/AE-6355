@@ -2,9 +2,11 @@ import numpy as np
 import scipy as sp
 import scipy.optimize
 from scipy.interpolate import interp1d
-import matplotlib.pyplot as plt
 from high_temp_shock_curve_fit import (GammaTildeCurveFit, HighTempCurveFit,
                                        compute_curve_fit_enthaply, compute_number_density)
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+mpl.rcParams['text.usetex'] = True
 
 R_universal = 8.3145e3 # Newton * meter / Kelvin * kilomol
 molar_mass_air = 28.97  # kg / kmol
@@ -257,8 +259,8 @@ normalized_x = (x_chord-x_l[0]) / l_chord
 plt.plot(x_chord, cp_chord)
 plt.grid()
 # plt.axis('equal')
-plt.xlabel('X Chord Percentage')
-plt.ylabel('Cp')
+plt.xlabel('Normalized X along chord')
+plt.ylabel(r'$C_p$')
 
 """
 Physically this distribution should a higher contribution of pressure from the bottom, thus being positive. Additionally
@@ -299,11 +301,11 @@ plt.figure()
 plt.semilogx(kn_range, bridge_coefficient(cl_cont, cl_free, kn_range))
 plt.grid()
 plt.xlabel('Knudsen Number')
-plt.ylabel('Cl')
+plt.ylabel(r'$C_l$')
 
 plt.figure()
 plt.semilogx(kn_range, bridge_coefficient(cd_cont, cd_free, kn_range))
 plt.grid()
 plt.xlabel('Knudsen Number')
-plt.ylabel('Cd')
+plt.ylabel(r'$C_d$')
 plt.show()

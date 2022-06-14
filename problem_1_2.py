@@ -40,10 +40,10 @@ print("\nPART A:")
 m_1_a = cpg_velocity_to_mach(u_1, T_1, gamma_air, molar_mass_air)
 # print(f"Upstream Mach number: {m_1_a}")
 
-pressure_ratio_a = cpg_pressure_ratio(gamma_air, m_1_a, shock_angle)  # rho_2 / rho_1
+pressure_ratio_a = cpg_pressure_ratio(gamma_air, m_1_a, shock_angle)  # p_2 / p_1
 print(f"Pressure ratio across normal shock: {pressure_ratio_a}")
 
-density_ratio_a = cpg_density_ratio(gamma_air, m_1_a, shock_angle)
+density_ratio_a = cpg_density_ratio(gamma_air, m_1_a, shock_angle) # rho_2 / rho_1
 print(f"Density ratio across normal shock: {density_ratio_a}")
 
 # print(f"Epsilon across normal shock: {1 / density_ratio_a}")
@@ -94,9 +94,9 @@ def outer_loop(e0, p_1, rho_1, h_1, u_1, T_1):
     h_2_est = h_1 + u_1 ** 2 / 2 * (1 - e0 ** 2)
     T0 = T_1 + 5000  # Random guess from T_1
 
-    def inner_loop(T):
+    def inner_loop(T, h_2_est):
         return h_2_est - enthalpy_N2(T)
-    T_converged = sp.optimize.newton(inner_loop, T0)
+    T_converged = sp.optimize.newton(inner_loop, T0, args={h_2_est})
 
     rho_2 = p_2_est / (R_N2 * T_converged)
     eps_check = rho_1 / rho_2

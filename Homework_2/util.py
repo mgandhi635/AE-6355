@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+
 mpl.rcParams['text.usetex'] = True
 
 
@@ -15,6 +16,11 @@ def exponential_atmosphere(h, H, rho_0):
     return rho_0 * np.exp(-h / H)
 
 
+def altitude_from_exponential_atmosphere_density(rho, rho_0, H):
+    density_ratio = rho / rho_0
+    return -np.log(density_ratio) * H * 1000
+
+
 def gravity_variation(h, g_0, rp):
     """
     Compute gravitational constant using inverse square law
@@ -23,7 +29,7 @@ def gravity_variation(h, g_0, rp):
     :param rp: planet radius in km
     :return: g: acceleration of gravity at altitude in m/s^2
     """
-    return g_0 * (rp**2) / (rp + h)**2
+    return g_0 * (rp ** 2) / (rp + h) ** 2
 
 
 def ballistic_eom(t, x, rp, H, B, g_0, rho_0):
@@ -54,7 +60,7 @@ def ballistic_eom(t, x, rp, H, B, g_0, rho_0):
     # g= g_0
 
     V_dot = -rho * V ** 2 / (2 * B) - g * np.sin(gamma)
-    gamma_dot = 1. / V * (V ** 2 * np.cos(gamma) / (rp*1000 + h) - g * np.cos(gamma) )
+    gamma_dot = 1. / V * (V ** 2 * np.cos(gamma) / (rp * 1000 + h) - g * np.cos(gamma))
     h_dot = V * np.sin(gamma)
 
     x_dot = np.array([V_dot, gamma_dot, h_dot])
@@ -75,9 +81,9 @@ def compute_constant_C(rho_0, H, Beta, gamma):
 
 
 def allen_eggers_velocity(h, rho_0, H, B, gamma, V_0):
-    H_m = H*1000
+    H_m = H * 1000
     C = compute_constant_C(rho_0, H, B, gamma)
-    return V_0 * np.exp (C * np.exp (-h / H_m))
+    return V_0 * np.exp(C * np.exp(-h / H_m))
 
 
 def compute_max_accel_numerical(x, rp, H, B, g_0, rho_0):
@@ -92,14 +98,15 @@ def compute_max_accel_numerical(x, rp, H, B, g_0, rho_0):
 
 
 def compute_max_accel_allen_eggers(rho_0, H, B, gamma, V_0):
-    H_m = H*1000
+    H_m = H * 1000
     C = compute_constant_C(rho_0, H, B, gamma)
-    h_n_max = H_m * np.log(-2*C)
+    h_n_max = H_m * np.log(-2 * C)
     v_n_max = allen_eggers_velocity(h_n_max, rho_0, H, B, gamma, V_0)
     v_n_max_check = V_0 * np.exp(-0.5)
     # print(v_n_max_check - v_n_max)
     n_max = V_0 ** 2 * np.sin(gamma) / (2 * np.e * 9.806 * H_m)
     return n_max, h_n_max, v_n_max
+
 
 line_styles = {'nm6': 'b-',
                'nm10': 'g-',
@@ -113,28 +120,28 @@ line_labels = {'nm': 'DOP853',
 
 
 def plot_problem_1(state, gamma, fig_num=0, prefix='nm'):
-
-    style_key = prefix+str(np.abs(gamma))
+    style_key = prefix + str(np.abs(gamma))
     style = line_styles[style_key]
     label = line_labels[prefix]
 
     plt.figure(fig_num)
     plt.xlabel(r'Velocity ($\frac{km}{s}$)')
     plt.ylabel(r'Altitude ($km$)')
-    plt.plot(state[0]/1000, state[2]/1000, style, label=label+ r': $\gamma_{atm}=$'+f'{gamma}'+r'$^\circ$')
+    plt.plot(state[0] / 1000, state[2] / 1000, style, label=label + r': $\gamma_{atm}=$' + f'{gamma}' + r'$^\circ$')
     plt.legend()
 
-    plt.figure(fig_num+1)
+    plt.figure(fig_num + 1)
     plt.xlabel(r'Velocity ($\frac{km}{s}$)')
     plt.ylabel(r'$\gamma$ ($^\circ$)')
-    plt.plot(state[0]/1000, np.degrees(state[1]), style, label=label+ r': $\gamma_{atm}=$'+f'{gamma}'+r'$^\circ$')
+    plt.plot(state[0] / 1000, np.degrees(state[1]), style,
+             label=label + r': $\gamma_{atm}=$' + f'{gamma}' + r'$^\circ$')
     plt.legend()
 
 
 def general_cross_range(ld_ratio, phi, rp):
-    t1 = np.pi**2 / 48 * ld_ratio**2 * np.sin(2*phi)
-    t2 = np.pi**2 * (1 + 4 / (ld_ratio * np.cos(phi))**2)
-    return t1*(1 - 6 / t2) * rp
+    t1 = np.pi ** 2 / 48 * ld_ratio ** 2 * np.sin(2 * phi)
+    t2 = np.pi ** 2 * (1 + 4 / (ld_ratio * np.cos(phi)) ** 2)
+    return t1 * (1 - 6 / t2) * rp
 
 
 def sphere_volume(radius):
@@ -150,7 +157,7 @@ def allen_eggers_acceleration(h, V_atm, gamma, H, rho_0, Beta):
     C = compute_constant_C(rho_0, H, Beta, gamma)
     t1 = np.exp(-h / H_m)
     t2 = np.exp(2 * C * t1)
-    t3 = -C * V_atm**2 * np.sin(gamma) / H_m
+    t3 = -C * V_atm ** 2 * np.sin(gamma) / H_m
     return t1 * t2 * t3
 
 
@@ -168,13 +175,13 @@ def equilibrium_glide_gamma(v, v_c, l_d_ratio, H, rp):
 
 
 def equilibrium_glide_acceleration(v, v_c, l_d_ratio):
-    t1 = np.sqrt((1 / l_d_ratio)**2 + 1)
-    t2 = (1 - (v / v_c)**2)
+    t1 = np.sqrt((1 / l_d_ratio) ** 2 + 1)
+    t2 = (1 - (v / v_c) ** 2)
     return -1 * t1 * t2
 
 
 def equilibrium_glide_peak_acceleration(l_d_ratio):
-    return -np.sqrt((1 / l_d_ratio)**2 + 1)
+    return -np.sqrt((1 / l_d_ratio) ** 2 + 1)
 
 
 def skipping_entry_gamma(v, v_atm, l_d_ratio, gamma_atm):
@@ -183,13 +190,56 @@ def skipping_entry_gamma(v, v_atm, l_d_ratio, gamma_atm):
 
 def skipping_entry_density(gamma, gamma_atm, H_m, Beta, l_d_ratio):
     t1 = np.cos(gamma) - np.cos(gamma_atm)
-    t2 = 2*Beta / (l_d_ratio*H_m)
-    return t1*t2
+    t2 = 2 * Beta / (l_d_ratio * H_m)
+    return t1 * t2
 
 
 def skipping_entry_acceleration(v, rho, Beta):
-    return -rho * v **2 / (2 * Beta)
+    return -rho * v ** 2 / (2 * Beta)
 
 
 def skipping_entry_peak_acceleration(v_atm, gamma_atm, l_d_ratio, g_0, H_m):
-    return v_atm**2 * gamma_atm**2 * np.exp(2 * gamma_atm / l_d_ratio) / (2 * g_0 * H_m) * (1 + (1 / l_d_ratio)**2) ** (1/2)
+    return v_atm ** 2 * gamma_atm ** 2 * np.exp(2 * gamma_atm / l_d_ratio) / (2 * g_0 * H_m) * (
+            1 + (1 / l_d_ratio) ** 2) ** (1 / 2)
+
+
+def lifting_entry_velocity(h, rp, g_0, Beta, l_d_ratio, phi, H, rho_0):
+    """
+
+    :param h:
+    :param rp:
+    :param g_0:
+    :param Beta:
+    :param l_d_ratio:
+    :param phi: bank angle radians
+    :return:
+    """
+    g = gravity_variation(h / 1000, g_0, rp)
+    r = rp*1000 + h
+    rho = exponential_atmosphere(h / 1000, H, rho_0)
+    t1 = l_d_ratio * np.cos(phi) * (rho * r) / (2 * Beta) + 1
+    return np.sqrt(g * r / t1)
+
+
+def planar_eom(t, x, Beta, rho_0, g_0, rp, H, l_d_ratio, phi):
+    V = x[0]
+    gamma = x[1]
+    h = x[2]
+
+    # Convert altitude to km
+    h_km = h / 1000
+
+    # Compute the current density
+    rho = exponential_atmosphere(h_km, H, rho_0)
+
+    # Compute current acceleration of gravity
+    g = gravity_variation(h_km, g_0, rp)
+    # g= g_0
+
+    V_dot = -rho * V ** 2 / (2 * Beta) - g * np.sin(gamma)
+    gamma_dot = V * np.cos(gamma) / (rp * 1000 + h) - g * np.cos(gamma) / V + \
+                rho * V / (2 * Beta) * l_d_ratio * np.cos(phi)
+    h_dot = V * np.sin(gamma)
+
+    x_dot = np.array([V_dot, gamma_dot, h_dot])
+    return x_dot

@@ -30,10 +30,10 @@ Beta = compute_ballistic_coeff(mass, Cd, A_ref)
 
 h_init = altitude_from_exponential_atmosphere_density(rho_init, rho_0, H)  # m
 v_init = 7456  # m/s
-gamma_init = equilibrium_glide_gamma(v_init, v_c, l_d_ratio, H, rE)
-# print(h_init)
-# print(v_init)
-# print(np.degrees(gamma_init))
+gamma_init = equilibrium_glide_gamma(v_init, v_c, l_d_ratio*np.cos(phi), H, rE)
+print(h_init)
+print(v_init)
+print(np.degrees(gamma_init))
 
 t_span = (0, 1.5e3)
 t_eval = np.linspace(t_span[0], t_span[-1], int(1e5))

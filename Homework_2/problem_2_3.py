@@ -15,7 +15,7 @@ l_desired = 1500  # km
 sol = sp.optimize.newton(cross_range_root_find, 1.0, args=(phi, rE, l_desired))
 print(sol)
 
-alpha = np.arctan(1 / 1.11617)
+alpha = np.arctan(1 / sol)
 
 
 Cn = 2*np.sin(alpha)**2
@@ -25,6 +25,7 @@ Cd = Cn*np.sin(alpha)
 print(general_cross_range(sol, phi, rE))
 
 print(np.degrees(alpha))
+print(Cn)
 print(Cl)
 print(Cd)
 

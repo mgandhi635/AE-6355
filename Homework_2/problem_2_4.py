@@ -22,7 +22,7 @@ v_atm = 1.1*v_c  # m/s
 Beta = 200
 
 
-v_vec = np.linspace(1e4, 1.4*v_c, int(1e5))
+v_vec = np.linspace(1e1, 1.1*v_c, int(1e5))
 eg_gamma = equilibrium_glide_gamma(v_vec, v_c, l_d_ratio, H, rE)
 se_gamma = skipping_entry_gamma(v_vec, v_atm, l_d_ratio, gamma_atm)
 
@@ -36,7 +36,7 @@ ax2.plot(v_vec, np.degrees(se_gamma), label=r"Skipping Entry $\gamma$", c='b')
 ax1.set_xlabel(r"Velocity $(\frac{m}{s}$)")
 ax1.set_ylabel(r"Flight Path Angle $(^\circ$)")
 ax1.set_ylim([-18,0])
-ax2.set_ylim([-25,25])
+ax2.set_ylim([-40,40])
 
 ax2.legend()
 plt.grid()
@@ -85,6 +85,7 @@ print(f"PART B")
 
 peak_n_skipping = skipping_entry_peak_acceleration(v_atm, gamma_atm, l_d_ratio, g_0, H_m)
 peak_n_eq_glide = equilibrium_glide_peak_acceleration(l_d_ratio)
+print(v_atm)
 print(f"Peak deceleration skipping: {peak_n_skipping:.3f} (g's)")
 print(f"Peak deceleration eq glide: {peak_n_eq_glide:.3f} (g's)")
 

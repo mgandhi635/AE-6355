@@ -69,9 +69,14 @@ altitude_zero_event.terminal = True
 altitude_zero_event.direction = -1
 
 
+def compute_constant_C(rho_0, H, Beta, gamma):
+    H_m = H * 1000
+    return rho_0 * H_m / (2 * Beta * np.sin(gamma))
+
+
 def allen_eggers_velocity(h, rho_0, H, B, gamma, V_0):
     H_m = H*1000
-    C = (rho_0 * H_m) / (2 * B * np.sin(gamma))
+    C = compute_constant_C(rho_0, H, B, gamma)
     return V_0 * np.exp (C * np.exp (-h / H_m))
 
 
@@ -88,7 +93,7 @@ def compute_max_accel_numerical(x, rp, H, B, g_0, rho_0):
 
 def compute_max_accel_allen_eggers(rho_0, H, B, gamma, V_0):
     H_m = H*1000
-    C = (rho_0 * H_m) / (2 * B * np.sin(gamma))
+    C = compute_constant_C(rho_0, H, B, gamma)
     h_n_max = H_m * np.log(-2*C)
     v_n_max = allen_eggers_velocity(h_n_max, rho_0, H, B, gamma, V_0)
     v_n_max_check = V_0 * np.exp(-0.5)
@@ -132,4 +137,59 @@ def general_cross_range(ld_ratio, phi, rp):
     return t1*(1 - 6 / t2) * rp
 
 
+def sphere_volume(radius):
+    return 4 / 3 * np.pi * radius ** 3
 
+
+def compute_ballistic_coeff(mass, Cd, A):
+    return mass / (Cd * A)
+
+
+def allen_eggers_acceleration(h, V_atm, gamma, H, rho_0, Beta):
+    H_m = H * 1000
+    C = compute_constant_C(rho_0, H, Beta, gamma)
+    t1 = np.exp(-h / H_m)
+    t2 = np.exp(2 * C * t1)
+    t3 = -C * V_atm**2 * np.sin(gamma) / H_m
+    return t1 * t2 * t3
+
+
+def equilibrium_glide_gamma(v, v_c, l_d_ratio, H, rp):
+    """
+    Compute flight path angle as a function of velocity for the equilibrium glide case. Assumes constant L/D.
+    :param v: (m/s)
+    :param v_c: (m/s)
+    :param l_d_ratio:
+    :param H_m: (m)
+    :param rp: (m)
+    :return:
+    """
+    return (v_c / v) ** 2 * (1 / l_d_ratio) * -2 * H / rp
+
+
+def equilibrium_glide_acceleration(v, v_c, l_d_ratio):
+    t1 = np.sqrt((1 / l_d_ratio)**2 + 1)
+    t2 = (1 - (v / v_c)**2)
+    return -1 * t1 * t2
+
+
+def equilibrium_glide_peak_acceleration(l_d_ratio):
+    return -np.sqrt((1 / l_d_ratio)**2 + 1)
+
+
+def skipping_entry_gamma(v, v_atm, l_d_ratio, gamma_atm):
+    return gamma_atm - (l_d_ratio * np.log(v / v_atm))
+
+
+def skipping_entry_density(gamma, gamma_atm, H_m, Beta, l_d_ratio):
+    t1 = np.cos(gamma) - np.cos(gamma_atm)
+    t2 = 2*Beta / (l_d_ratio*H_m)
+    return t1*t2
+
+
+def skipping_entry_acceleration(v, rho, Beta):
+    return -rho * v **2 / (2 * Beta)
+
+
+def skipping_entry_peak_acceleration(v_atm, gamma_atm, l_d_ratio, g_0, H_m):
+    return v_atm**2 * gamma_atm**2 * np.exp(2 * gamma_atm / l_d_ratio) / (2 * g_0 * H_m) * (1 + (1 / l_d_ratio)**2) ** (1/2)

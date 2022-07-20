@@ -21,3 +21,8 @@ def equilibrium_glide_gamma(v, v_c, l_d_ratio, H, rp):
     :return:
     """
     return (v_c / v) ** 2 * (1 / l_d_ratio) * -2 * H / rp
+
+
+def normalize_angle(angle):
+    angle -= np.ceil(angle / (2*np.pi) - 0.5) * (2*np.pi)
+    return angle

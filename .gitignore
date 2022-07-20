@@ -1,4 +1,2 @@
 .idea/*
-__pycache__/*
-Homework_2/__pycache__/
-*/__pycache__/*
+**/__pycache__/

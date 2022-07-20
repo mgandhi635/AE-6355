@@ -1,7 +1,7 @@
 import numpy as np
 from typing import NamedTuple
 
-from project_utils import compute_ballistic_coeff
+from Project.src.project_utils import compute_ballistic_coeff
 
 
 class EntryVehicleParams(NamedTuple):
@@ -31,7 +31,7 @@ def create_STS_13_params():
     mass = 92000  # kg
     beta = compute_ballistic_coeff(mass, Cd, A_ref)
     h_atm = 125*1000 # meters
-    w_earth = 0
+    w_earth = 7.2921159e-5
 
     return EntryVehicleParams(mass, w_earth, beta, rE, g_0, l_d_ratio, H, rho_0, h_atm)
 

@@ -1,5 +1,5 @@
 import numpy as np
-from project_vars import EntryVehicleParams
+from Project.src.project_vars import EntryVehicleParams
 
 
 def compute_gravity_from_altitude(altitude: float, params: EntryVehicleParams):

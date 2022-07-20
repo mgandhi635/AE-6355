@@ -5,6 +5,10 @@ from typing import NamedTuple
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
+from project_vars import EntryVehicleParams
+from project_utils import compute_ballistic_coeff
+from environments import (compute_density_from_altitude, compute_gravity_from_altitude)
+
 mpl.rcParams['text.usetex'] = True
 mpl.rcParams.update({'font.size': 13})
 
@@ -12,34 +16,6 @@ nd = np.ndarray
 sin = np.sin
 cos = np.cos
 tan = np.tan
-
-
-class EntryVehicleParams(NamedTuple):
-    mass: float
-    omega_planet: float
-    ballistic_coeff: float
-    radius_planet: float
-    gravity_planet: float
-    lift_drag_ratio: float
-    scale_height: float
-    density_planet: float
-    atmosphere_altitude_planet: float
-
-
-def compute_gravity_from_altitude(altitude: float, params: EntryVehicleParams):
-    """Gravity computation"""
-    return params.gravity_planet * \
-           (params.radius_planet ** 2) / (params.radius_planet + altitude) ** 2
-
-
-def compute_density_from_altitude(altitude: float, params: EntryVehicleParams):
-    """
-    Altitude and scale height are in meters
-    :param altitude:
-    :param params:
-    :return:
-    """
-    return params.density_planet * np.exp(-altitude / params.scale_height)
 
 
 def non_planar_eom(t: nd, state: nd, control: nd, params: EntryVehicleParams):
@@ -118,4 +94,40 @@ def altitude_exoatmosphere_event(t: float, state: nd, params: EntryVehicleParams
     x = state[2] - params.atmosphere_altitude_planet  # The altitude is in meters
     return x
 
+
+if __name__ == "__main__":
+    # get a set of parameters
+    from project_vars import STS_13_params
+    from project_utils import (altitude_from_exponential_atmosphere_density, equilibrium_glide_gamma)
+    from scipy.integrate import solve_ivp
+
+    rE = 6378  # km
+    muE = 3.986e5  # km^3 / s^2
+    v_c = np.sqrt(muE / rE) * 1000  # m/s
+
+    V_0 = 7456  # m/s
+    gamma_0 = equilibrium_glide_gamma(V_0, v_c, STS_13_params.lift_drag_ratio, STS_13_params.scale_height, STS_13_params.radius_planet)
+    rho_0 = STS_13_params.density_planet  # kg/m^3
+    rho_init = 1.874e-07 * rho_0
+    h_0 = altitude_from_exponential_atmosphere_density(rho_init, rho_0, STS_13_params.scale_height)
+    psi_0 = 0
+    theta_0 = 0
+    phi_0 = 0
+    x_0 = np.array([V_0, gamma_0, h_0, psi_0, theta_0, phi_0])
+    sigma = np.radians(56)
+    u_0 = [0,0,sigma]
+
+    t_span = (0, 1.5e3)
+    t_eval = np.linspace(t_span[0], t_span[-1], int(1e5))
+
+    # Solve numerically first
+    sol = solve_ivp(non_planar_eom, t_span, x_0,
+                    t_eval=t_eval, args=(u_0, STS_13_params), events=altitude_zero_event)
+
+    state = sol.y
+    plt.figure(0)
+    plt.xlabel(r'Velocity ($\frac{km}{s}$)')
+    plt.ylabel(r'Altitude ($km$)')
+    plt.plot(state[0] / 1000, state[2] / 1000, label='Planar EOM', c='b', linestyle='--', linewidth=2, alpha=0.7)
+    plt.show()
 

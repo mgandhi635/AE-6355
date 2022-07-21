@@ -41,7 +41,7 @@ t_eval = np.linspace(t_span[0], t_span[-1], int(1e5))
 # Solve numerically first
 x_initial = [v_init, gamma_init, h_init]
 sol = solve_ivp(planar_eom, t_span, x_initial,
-                t_eval=t_eval, args=(Beta, rho_0, g_0, rE, H, l_d_ratio, phi), events=altitude_zero_event)
+                t_eval=t_eval, args=(Beta, rho_0, g_0, rE, H, l_d_ratio, phi), events=altitude_zero_event, max_step=0.1)
 
 state = sol.y
 

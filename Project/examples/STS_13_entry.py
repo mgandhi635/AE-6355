@@ -43,7 +43,7 @@ x_1 = np.array([V_1, gamma_1, h_1, psi_1, theta_0, phi_0])
 sigma = np.radians(56)
 u_0 = [0, 0, sigma]
 
-t_span = (0, 2.0e3)
+t_span = (0, 2.5e4)
 t_eval = np.linspace(t_span[0], t_span[-1], int(1e5))
 
 # Solve numerically first
@@ -51,7 +51,7 @@ sol = solve_ivp(non_planar_eom, t_span, x_1,
                 t_eval=t_eval, args=(u_0, STS_13_params), events=altitude_zero_event, max_step = 1)
 
 state = sol.y
-
+time = sol.t
 
 
 plt.figure(0)
@@ -62,7 +62,7 @@ plt.plot(state[0] / 1000, state[2] / 1000, label='Planar EOM', c='b', linestyle=
 plt.figure(1)
 plt.xlabel(r'Time ($s$)')
 plt.ylabel(r'Altitude ($kft$)')
-plt.plot(t_eval, state[2]*3.28084 / 1000, label='Planar EOM', c='b', linestyle='--', linewidth=2, alpha=0.7)
+plt.plot(time, state[2]*3.28084 / 1000, label='Planar EOM', c='b', linestyle='--', linewidth=2, alpha=0.7)
 plt.grid()
 # Create a new plot of the world
 countries = gpd.read_file(

@@ -6,7 +6,8 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 from Project.src.project_vars import EntryVehicleParams
-from Project.src.environments import (compute_density_from_altitude, compute_gravity_from_altitude)
+from Project.src.environments import (compute_density_from_altitude, compute_gravity_from_altitude,
+                                      compute_density_std_atmosphere)
 
 mpl.rcParams['text.usetex'] = True
 mpl.rcParams.update({'font.size': 13})
@@ -41,7 +42,8 @@ def non_planar_eom(t: nd, state: nd, control: nd, params: EntryVehicleParams):
     r = h + params.radius_planet
 
     g = compute_gravity_from_altitude(h, params)
-    rho = compute_density_from_altitude(h, params)
+    # rho = compute_density_from_altitude(h, params)
+    rho = compute_density_std_atmosphere(h)
 
     dv1 = T * cos(epsilon) / params.mass
     dv2 = -rho * V ** 2 / (2 * params.ballistic_coeff)

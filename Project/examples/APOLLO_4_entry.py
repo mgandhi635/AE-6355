@@ -7,54 +7,39 @@ import geopandas as gpd
 mpl.rcParams['text.usetex'] = True
 mpl.rcParams.update({'font.size': 13})
 
-from Project.src.project_vars import STS_13_params
-from Project.src.project_utils import (altitude_from_exponential_atmosphere_density, equilibrium_glide_gamma, normalize_angle)
+from Project.src.project_vars import APOLLO_4_params
+from Project.src.project_utils import (altitude_from_exponential_atmosphere_density, equilibrium_glide_gamma,
+                                       normalize_angle, inch_to_meter)
 from Project.src.nonplanar_eom import non_planar_eom, altitude_zero_event
 
-rE = 6378  # km
-muE = 3.986e5  # km^3 / s^2
-v_c = np.sqrt(muE / rE) * 1000  # m/s
 
-V_0 = 7456  # m/s
-gamma_0 = equilibrium_glide_gamma(V_0, v_c, STS_13_params.lift_drag_ratio, STS_13_params.scale_height, STS_13_params.radius_planet)
-rho_0 = STS_13_params.density_planet  # kg/m^3
-rho_init = 1.874e-07 * rho_0
-h_0 = altitude_from_exponential_atmosphere_density(rho_init, rho_0, STS_13_params.scale_height)
-psi_0 = np.radians(60)
+V_0 = inch_to_meter(36333*12)  # m/s
+gamma_0 = np.radians(-7.350)
+h_0 = APOLLO_4_params.atmosphere_altitude_planet
+psi_0 = np.radians(90-66.481)
 
-pos_final = [242.163116-360, 34.930885]  # (long, lat)
-pos_initial = [150-360, 0]
+pos_final = np.degrees(normalize_angle(np.radians([-157.976, 32.465])))  # (long, lat)
+pos_initial = [155.637, 23.398]
 
 theta_0 = np.radians(pos_initial[0])
 phi_0 = np.radians(pos_initial[1])
-# theta_0 = 0
-# phi_0 = 0
-
 x_0 = np.array([V_0, gamma_0, h_0, psi_0, theta_0, phi_0])
 
-# Initial conditions from datasheet
-V_1 = 7397.1912
-gamma_1 = np.radians(-2.036)
-h_1 = 213241.64616
-psi_1 = np.radians(90-59.723)
-x_1 = np.array([V_1, gamma_1, h_1, psi_1, theta_0, phi_0])
-
-
-sigma = np.radians(56)
+sigma = np.radians(58)
 u_0 = [0, 0, sigma]
 
-t_span = (0, 2.5e4)
-t_eval = np.linspace(t_span[0], t_span[-1], int(1e5))
+t_span = (0, 710)
+t_eval = np.linspace(t_span[0], t_span[-1], int(1e4))
 
 exponential_atmosphere = True
 std_atmosphere = False
 # Solve numerically first
-sol_exp = solve_ivp(non_planar_eom, t_span, x_1,
-                    t_eval=t_eval, args=(u_0, STS_13_params, exponential_atmosphere),
+sol_exp = solve_ivp(non_planar_eom, t_span, x_0,
+                    t_eval=t_eval, args=(u_0, APOLLO_4_params, exponential_atmosphere),
                     events=altitude_zero_event, max_step = 1)
 
-sol_std = solve_ivp(non_planar_eom, t_span, x_1,
-                    t_eval=t_eval, args=(u_0, STS_13_params, std_atmosphere),
+sol_std = solve_ivp(non_planar_eom, t_span, x_0,
+                    t_eval=t_eval, args=(u_0, APOLLO_4_params, std_atmosphere),
                     events=altitude_zero_event, max_step = 1)
 
 
@@ -76,6 +61,26 @@ plt.xlabel(r'Time ($s$)')
 plt.ylabel(r'Altitude ($kft$)')
 plt.plot(time_exp, state_exp[2]*3.28084 / 1000, label='Exp', c='b', linestyle='--', linewidth=2, alpha=0.7)
 plt.plot(time_std, state_std[2]*3.28084 / 1000, label='Std', c='r', linestyle='--', linewidth=2, alpha=0.7)
+
+plt.figure(2)
+plt.xlabel(r'Time ($s$)')
+plt.ylabel(r'Velocity ($\frac{kft}{s}$)')
+plt.plot(time_exp, state_exp[0]*3.28084 / 1000, label='Exp', c='b', linestyle='--', linewidth=2, alpha=0.7)
+plt.plot(time_std, state_std[0]*3.28084 / 1000, label='Std', c='r', linestyle='--', linewidth=2, alpha=0.7)
+
+plt.figure(3)
+plt.xlabel(r'Time ($s$)')
+plt.ylabel(r'Flight Path Angle ($^\circ$)')
+plt.plot(time_exp, np.degrees(state_exp[1]), label='Exp', c='b', linestyle='--', linewidth=2, alpha=0.7)
+plt.plot(time_std, np.degrees(state_std[1]), label='Std', c='r', linestyle='--', linewidth=2, alpha=0.7)
+
+
+plt.figure(4)
+plt.xlabel(r'Time ($s$)')
+plt.ylabel(r'Heading ($^\circ$)')
+plt.plot(time_exp, np.degrees(normalize_angle(state_exp[3])), label='Exp', c='b', linestyle='--', linewidth=2, alpha=0.7)
+plt.plot(time_std, np.degrees(normalize_angle(state_std[3])), label='Std', c='r', linestyle='--', linewidth=2, alpha=0.7)
+
 
 plt.grid()
 # Create a new plot of the world

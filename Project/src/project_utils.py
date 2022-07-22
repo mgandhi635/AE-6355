@@ -26,3 +26,6 @@ def equilibrium_glide_gamma(v, v_c, l_d_ratio, H, rp):
 def normalize_angle(angle):
     angle -= np.ceil(angle / (2*np.pi) - 0.5) * (2*np.pi)
     return angle
+
+def inch_to_meter(inch):
+    return 0.0254*inch

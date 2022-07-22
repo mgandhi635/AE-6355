@@ -18,7 +18,7 @@ cos = np.cos
 tan = np.tan
 
 
-def non_planar_eom(t: nd, state: nd, control: nd, params: EntryVehicleParams):
+def non_planar_eom(t: nd, state: nd, control: nd, params: EntryVehicleParams, exp_atmosphere: bool=True):
     """
     The state vector is speed, flight path angle, altitude, heading, longitude, latitude
     The control vector is bank angle, thrust force, thrust angle from flight path
@@ -42,8 +42,10 @@ def non_planar_eom(t: nd, state: nd, control: nd, params: EntryVehicleParams):
     r = h + params.radius_planet
 
     g = compute_gravity_from_altitude(h, params)
-    # rho = compute_density_from_altitude(h, params)
-    rho = compute_density_std_atmosphere(h)
+    if exp_atmosphere:
+        rho = compute_density_from_altitude(h, params)
+    else:
+        rho = compute_density_std_atmosphere(h)
 
     dv1 = T * cos(epsilon) / params.mass
     dv2 = -rho * V ** 2 / (2 * params.ballistic_coeff)

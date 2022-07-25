@@ -29,3 +29,15 @@ def normalize_angle(angle):
 
 def inch_to_meter(inch):
     return 0.0254*inch
+
+
+def compute_desired_heading(cur_position, des_position):
+    pos_vector = des_position - cur_position
+    heading_des = np.arctan2(pos_vector[1], pos_vector[0])
+    return normalize_angle(heading_des)
+
+
+# p1 = np.array([10,2])
+# p2 = np.array([0,0])
+#
+# print(np.degrees(compute_desired_heading(p2, p1)))

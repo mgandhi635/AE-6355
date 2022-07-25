@@ -26,7 +26,7 @@ phi_0 = np.radians(pos_initial[1])
 x_0 = np.array([V_0, gamma_0, h_0, psi_0, theta_0, phi_0])
 
 sigma = np.radians(58)
-u_0 = [0, 0, sigma]
+u_0 = [0, 0, sigma, APOLLO_4_params.lift_drag_ratio]
 
 t_span = (0, 710)
 t_eval = np.linspace(t_span[0], t_span[-1], int(1e4))
@@ -55,24 +55,28 @@ plt.xlabel(r'Velocity ($\frac{km}{s}$)')
 plt.ylabel(r'Altitude ($km$)')
 plt.plot(state_exp[0] / 1000, state_exp[2] / 1000, label='Exp', c='b', linestyle='--', linewidth=2, alpha=0.7)
 plt.plot(state_std[0] / 1000, state_std[2] / 1000, label='Std', c='r', linestyle='--', linewidth=2, alpha=0.7)
+plt.legend()
 
 plt.figure(1)
 plt.xlabel(r'Time ($s$)')
 plt.ylabel(r'Altitude ($kft$)')
 plt.plot(time_exp, state_exp[2]*3.28084 / 1000, label='Exp', c='b', linestyle='--', linewidth=2, alpha=0.7)
 plt.plot(time_std, state_std[2]*3.28084 / 1000, label='Std', c='r', linestyle='--', linewidth=2, alpha=0.7)
+plt.legend()
 
 plt.figure(2)
 plt.xlabel(r'Time ($s$)')
 plt.ylabel(r'Velocity ($\frac{kft}{s}$)')
 plt.plot(time_exp, state_exp[0]*3.28084 / 1000, label='Exp', c='b', linestyle='--', linewidth=2, alpha=0.7)
 plt.plot(time_std, state_std[0]*3.28084 / 1000, label='Std', c='r', linestyle='--', linewidth=2, alpha=0.7)
+plt.legend()
 
 plt.figure(3)
 plt.xlabel(r'Time ($s$)')
 plt.ylabel(r'Flight Path Angle ($^\circ$)')
 plt.plot(time_exp, np.degrees(state_exp[1]), label='Exp', c='b', linestyle='--', linewidth=2, alpha=0.7)
 plt.plot(time_std, np.degrees(state_std[1]), label='Std', c='r', linestyle='--', linewidth=2, alpha=0.7)
+plt.legend()
 
 
 plt.figure(4)

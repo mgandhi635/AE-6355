@@ -1,7 +1,7 @@
 import numpy as np
 from typing import NamedTuple
 
-from Project.src.project_utils import compute_ballistic_coeff, inch_to_meter
+from Project.src.project_utils import compute_ballistic_coeff, inch_to_meter, normalize_angle
 
 
 class EntryVehicleParams(NamedTuple):
@@ -14,6 +14,7 @@ class EntryVehicleParams(NamedTuple):
     scale_height: float
     density_planet: float
     atmosphere_altitude_planet: float
+    desired_position: np.ndarray
 
 
 def create_STS_13_params():
@@ -32,8 +33,9 @@ def create_STS_13_params():
     beta = compute_ballistic_coeff(mass, Cd, A_ref)
     h_atm = 125*1000.0 # meters
     w_earth = 7.2921159e-5
+    p_des = np.radians([242.163116-360, 34.930885])  # (long, lat)
 
-    return EntryVehicleParams(mass, w_earth, beta, rE, g_0, l_d_ratio, H, rho_0, h_atm)
+    return EntryVehicleParams(mass, w_earth, beta, rE, g_0, l_d_ratio, H, rho_0, h_atm, p_des)
 
 def create_APOLLO_4_params():
     # STS-13 Params
@@ -52,8 +54,9 @@ def create_APOLLO_4_params():
     beta = compute_ballistic_coeff(mass, Cd, A_ref)
     h_atm = 121920 # meters
     w_earth = 7.2921159e-5
+    p_des = np.degrees(normalize_angle(np.radians([-157.976, 32.465])))  # (long, lat)
 
-    return EntryVehicleParams(mass, w_earth, beta, rE, g_0, l_d_ratio, H, rho_0, h_atm)
+    return EntryVehicleParams(mass, w_earth, beta, rE, g_0, l_d_ratio, H, rho_0, h_atm, p_des)
 
 
 STS_13_params = create_STS_13_params()

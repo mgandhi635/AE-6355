@@ -9,9 +9,7 @@ mpl.rcParams['text.usetex'] = True
 mpl.rcParams.update({'font.size': 13})
 
 from Project.src.project_vars import STS_13_params, EntryVehicleParams
-from Project.src.project_utils import (altitude_from_exponential_atmosphere_density, equilibrium_glide_gamma,
-                                       normalize_angle, inch_to_meter)
-from Project.src.nonplanar_eom import non_planar_eom, nonplanar_eom_jacobians, altitude_zero_event, compute_control
+from Project.edl_control.src.nonplanar_eom import non_planar_eom, nonplanar_eom_jacobians, altitude_zero_event, compute_control
 
 
 # Load the data

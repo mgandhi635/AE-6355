@@ -7,10 +7,9 @@ import geopandas as gpd
 mpl.rcParams['text.usetex'] = True
 mpl.rcParams.update({'font.size': 13})
 
-from Project.src.project_vars import APOLLO_4_params
-from Project.src.project_utils import (altitude_from_exponential_atmosphere_density, equilibrium_glide_gamma,
-                                       normalize_angle, inch_to_meter)
-from Project.src.nonplanar_eom import non_planar_eom, altitude_zero_event
+from edl_control.src.project_vars import APOLLO_4_params
+from edl_control.src.project_utils import (normalize_angle, inch_to_meter)
+from edl_control.src.nonplanar_eom import non_planar_eom, altitude_zero_event
 
 
 V_0 = inch_to_meter(36333*12)  # m/s

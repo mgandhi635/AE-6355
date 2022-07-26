@@ -5,23 +5,27 @@ This code was run using a `miniconda` virtual environment, available to
 download from the [conda website](https://docs.conda.io/en/latest/miniconda.html).
 
 ## Required Packages
-This code utilized the following packages, all of which should be installable via `conda install`
-
+In your new virtual environment, utilize pip or conda to install the following packages
 ```` 
-  - python=3.7
   - pandas
-  - plotly
   - numpy
   - scipy
   - matplotlib
-  - jax
-  - openpyxl
-  - geopandas
-  - slycot
   - control
 ````
 
+On my system, I used `python3.7` and installed the above utilizing `conda install`.
+
+Due to package interdependencies, it is usually faster to install `geopandas` via `pip`. 
+
+`pip install geopandas`
+
+The final step to be able to run all the examples is to install the development package locally. First change directories
+into the `Project` folder. In this directory there should be the `edl_control` folder, as well as `setup.py`. Next run `pip install -e .`
+This will make the `edl_control` development package available to your virtualenv, and you should be able to import it. 
+
 # Running the examples
+Make sure that you are in the `Project/edl_control/examples` directory when running these.
 
 ## STS_13
 

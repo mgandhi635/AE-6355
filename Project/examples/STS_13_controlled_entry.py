@@ -11,7 +11,7 @@ mpl.rcParams.update({'font.size': 13})
 from Project.src.project_vars import STS_13_params, EntryVehicleParams
 from Project.src.project_utils import (altitude_from_exponential_atmosphere_density, equilibrium_glide_gamma,
                                        normalize_angle, inch_to_meter)
-from Project.src.nonplanar_eom import non_planar_eom, nonplanar_eom_jacobians, altitude_zero_event
+from Project.src.nonplanar_eom import non_planar_eom, nonplanar_eom_jacobians, altitude_zero_event, compute_control
 
 
 # Load the data
@@ -27,7 +27,9 @@ Q[2,2] = 2  # height
 Q[3,3] = 1e5  # heading
 Q[4,4] = 20 # long
 Q[5,5] = 20  # lat
-R = 1e4*np.eye(2)
+R = np.eye(2)
+R[0,0] = 1e4
+R[1,1] = 1e4
 
 # Q = 1*np.eye(6)
 # Q[0,0] = 100
@@ -63,7 +65,7 @@ std_atmosphere = False
 K_vec = np.zeros((x_traj.shape[1], 2, 6))
 for i in range(1,x_traj.shape[1]):
     curr_x = x_traj[:,-i]
-    A, B = nonplanar_eom_jacobians(0, curr_x, u_0, STS_13_params, std_atmosphere)
+    A, B = nonplanar_eom_jacobians(0, curr_x, u_0, STS_13_params, exponential_atmosphere)
     try:
         K, S, E = lqr(A, B, Q, R)
         K_vec[-i,:,:] = K
@@ -71,7 +73,7 @@ for i in range(1,x_traj.shape[1]):
         K_vec[-i,:,:] = K_vec[-i+1,:,:]
 
 
-dynamic_args_std = (u_0, STS_13_params, std_atmosphere,
+dynamic_args_std = (u_0, STS_13_params, exponential_atmosphere,
                   K_vec, x_traj)
 
 plt.grid()
@@ -92,6 +94,11 @@ h_std = 5000
 n_samples = 50
 np.random.seed(5)
 
+all_x_trajectories = np.array([None]*n_samples, dtype=np.ndarray)
+all_u_trajectories = np.array([None]*n_samples, dtype=np.ndarray)
+all_t_trajectories = np.array([None]*n_samples, dtype=np.ndarray)
+
+# Generate each sample
 for i in range(n_samples):
     # Initial conditions from datasheet
     V_1 = 7397.1912 - 0 * np.random.randn(1)[0]
@@ -105,22 +112,51 @@ for i in range(n_samples):
                         events=altitude_zero_event, max_step=1)
 
     state_std = sol_std.y
+    control_std = np.zeros((2,state_std.shape[1]))
     time_std = sol_std.t
 
-    plt.figure(0)
-    plt.xlabel(r'Velocity ($\frac{km}{s}$)')
-    plt.ylabel(r'Altitude ($km$)')
-    # plt.plot(state_exp[0] / 1000, state_exp[2] / 1000, label='Exp', c='b', linestyle='--', linewidth=2, alpha=0.7)
-    plt.plot(state_std[0] / 1000, state_std[2] / 1000, label='Std', linestyle='--', linewidth=2, alpha=0.7)
+    for t in range(state_std.shape[1]):
+        control_std[:, t] = compute_control(state_std[:, t], u_0, x_traj, K_vec, STS_13_params)[2:]
 
-    plt.figure(1)
-    plt.xlabel(r'Time ($s$)')
-    plt.ylabel(r'Altitude ($kft$)')
-    # plt.plot(time_exp, state_exp[2]*3.28084 / 1000, label='Exp', c='b', linestyle='--', linewidth=2, alpha=0.7)
-    plt.plot(time_std, state_std[2]*3.28084 / 1000, label='Std', linestyle='--', linewidth=2, alpha=0.7)
+    all_x_trajectories[i] = state_std
+    all_u_trajectories[i] = control_std
+    all_t_trajectories[i] = time_std
 
-    # ax.scatter(np.degrees(normalize_angle(state_exp[4])), np.degrees(normalize_angle(state_exp[5])), c='b', alpha=0.5)
-    ax.scatter(np.degrees(normalize_angle(state_std[4])), np.degrees(normalize_angle(state_std[5])), alpha=0.2)
-    ax.scatter(pos_final[0], pos_final[1], color='g', marker='*', s=50)
 
-plt.show()
+# Save all the samples
+np.save('../plotting/sts_13_exp_controlled_entry_x.npy', all_x_trajectories[:], allow_pickle=True)
+np.save('../plotting/sts_13_exp_controlled_entry_u.npy', all_u_trajectories[:], allow_pickle=True)
+np.save('../plotting/sts_13_exp_controlled_entry_t.npy', all_t_trajectories[:], allow_pickle=True)
+
+#     plt.figure(0)
+#     plt.xlabel(r'Velocity ($\frac{km}{s}$)')
+#     plt.ylabel(r'Altitude ($km$)')
+#     # plt.plot(state_exp[0] / 1000, state_exp[2] / 1000, label='Exp', c='b', linestyle='--', linewidth=2, alpha=0.7)
+#     plt.plot(state_std[0] / 1000, state_std[2] / 1000, label='Std', linestyle='-', linewidth=2, alpha=0.7)
+#
+#     fig1 = plt.figure(1)
+#     ax1a = fig1.axes[0]
+#     ax1b = ax1a.twinx()
+#     plt.xlabel(r'Time ($s$)')
+#     plt.ylabel(r'Altitude ($km$)')
+#     ax1a.set_ylabel(r'Altitude ($km$)', color='r')
+#     ax1b.set_ylabel(r'Velocity ($\frac{km}{s}$)', color='b')
+#     # plt.plot(time_exp, state_exp[2]*3.28084 / 1000, label='Exp', c='b', linestyle='--', linewidth=2, alpha=0.7)
+#     ax1a.plot(time_std, state_std[2] / 1000, label='Std', linestyle='-', linewidth=2, alpha=0.5, c='r')
+#     ax1b.plot(time_std, state_std[0] / 1000, label='Std', linestyle='-', linewidth=2, alpha=0.5, c='b')
+#
+#     plt.figure(3)
+#     plt.xlabel(r'Time ($s$)')
+#     plt.ylabel(r'Roll Angle ($^\circ$)')
+#     plt.plot(time_std, np.degrees(control_std[0]), label='Std', linestyle='-', linewidth=2, alpha=0.7)
+#
+#     plt.figure(4)
+#     plt.xlabel(r'Time ($s$)')
+#     plt.ylabel(r'L/D Ratio')
+#     plt.plot(time_std, control_std[1], label='Std', linestyle='-', linewidth=2, alpha=0.7)
+#
+#     # ax.scatter(np.degrees(normalize_angle(state_exp[4])), np.degrees(normalize_angle(state_exp[5])), c='b', alpha=0.5)
+#     ax.scatter(np.degrees(normalize_angle(state_std[4])), np.degrees(normalize_angle(state_std[5])), alpha=0.2)
+#     ax.scatter(pos_final[0], pos_final[1], color='g', marker='*', s=50)
+#
+# plt.show()

@@ -15,6 +15,7 @@ class EntryVehicleParams(NamedTuple):
     density_planet: float
     atmosphere_altitude_planet: float
     desired_position: np.ndarray
+    initial_position: np.ndarray
 
 
 def create_STS_13_params():
@@ -34,8 +35,9 @@ def create_STS_13_params():
     h_atm = 125*1000.0 # meters
     w_earth = 7.2921159e-5
     p_des = np.radians([242.163116-360, 34.930885])  # (long, lat)
+    p_init = np.radians([150-360, 0])
 
-    return EntryVehicleParams(mass, w_earth, beta, rE, g_0, l_d_ratio, H, rho_0, h_atm, p_des)
+    return EntryVehicleParams(mass, w_earth, beta, rE, g_0, l_d_ratio, H, rho_0, h_atm, p_des, p_init)
 
 def create_APOLLO_4_params():
     # STS-13 Params
@@ -55,8 +57,9 @@ def create_APOLLO_4_params():
     h_atm = 121920 # meters
     w_earth = 7.2921159e-5
     p_des = np.degrees(normalize_angle(np.radians([-157.976, 32.465])))  # (long, lat)
+    p_init = np.radians([155.637, 23.398])
 
-    return EntryVehicleParams(mass, w_earth, beta, rE, g_0, l_d_ratio, H, rho_0, h_atm, p_des)
+    return EntryVehicleParams(mass, w_earth, beta, rE, g_0, l_d_ratio, H, rho_0, h_atm, p_des, p_init)
 
 
 STS_13_params = create_STS_13_params()

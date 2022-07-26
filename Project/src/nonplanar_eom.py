@@ -80,7 +80,7 @@ def non_planar_eom(t: nd, state: nd, control: nd, params: EntryVehicleParams,
     ld_ratio = control[3]
 
     if control_gain is not None:
-        control_data = compute_control(state, control, x_traj , control_gain, params)
+        control_data = compute_control(state, control, x_traj, control_gain, params)
         T = control_data[0]
         epsilon = control_data[1]
         sigma = control_data[2]

@@ -1,5 +1,5 @@
 import numpy as np
-from Project.src.project_vars import EntryVehicleParams
+from edl_control.src.project_vars import EntryVehicleParams
 
 
 def compute_gravity_from_altitude(altitude: float, params: EntryVehicleParams):

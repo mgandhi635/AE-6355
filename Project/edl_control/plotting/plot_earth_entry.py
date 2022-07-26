@@ -8,8 +8,8 @@ import geopandas as gpd
 mpl.rcParams['text.usetex'] = True
 mpl.rcParams.update({'font.size': 13})
 
-from Project.src.project_vars import STS_13_params, EntryVehicleParams
-from Project.src.project_utils import (normalize_angle)
+from edl_control.src.project_vars import STS_13_params, EntryVehicleParams
+from edl_control.src.project_utils import (normalize_angle)
 
 # Load the data for standard atmosphere
 x_traj_c = np.load('sts_13_controlled_entry_x.npy', allow_pickle=True)

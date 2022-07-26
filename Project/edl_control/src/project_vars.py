@@ -1,7 +1,7 @@
 import numpy as np
 from typing import NamedTuple
 
-from Project.src.project_utils import compute_ballistic_coeff, inch_to_meter, normalize_angle
+from edl_control.src.project_utils import compute_ballistic_coeff, inch_to_meter, normalize_angle
 
 
 class EntryVehicleParams(NamedTuple):

@@ -7,9 +7,9 @@ import geopandas as gpd
 mpl.rcParams['text.usetex'] = True
 mpl.rcParams.update({'font.size': 13})
 
-from Project.src.project_vars import STS_13_params
-from Project.src.project_utils import (normalize_angle)
-from Project.edl_control.src.nonplanar_eom import non_planar_eom, altitude_zero_event
+from edl_control.src.project_vars import STS_13_params
+from edl_control.src.project_utils import (normalize_angle)
+from edl_control.src.nonplanar_eom import non_planar_eom, altitude_zero_event
 
 
 rE = 6378  # km
@@ -56,7 +56,7 @@ time_std = sol_std.t
 
 
 # Load true data from STS_13
-data = np.loadtxt('../STS13_Metric.txt')
+data = np.loadtxt('../plotting/STS13_Metric.txt')
 true_time = data[:,0]
 true_altitude = data[:,1]
 true_velocity = data[:,2]

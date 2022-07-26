@@ -8,8 +8,8 @@ from control import lqr
 mpl.rcParams['text.usetex'] = True
 mpl.rcParams.update({'font.size': 13})
 
-from Project.src.project_vars import STS_13_params, EntryVehicleParams
-from Project.edl_control.src.nonplanar_eom import non_planar_eom, nonplanar_eom_jacobians, altitude_zero_event, compute_control
+from edl_control.src.project_vars import STS_13_params, EntryVehicleParams
+from edl_control.src.nonplanar_eom import non_planar_eom, nonplanar_eom_jacobians, altitude_zero_event, compute_control
 
 
 # Load the data

@@ -7,9 +7,9 @@ import geopandas as gpd
 mpl.rcParams['text.usetex'] = True
 mpl.rcParams.update({'font.size': 13})
 
-from Project.src.project_vars import STS_13_params
-from Project.src.project_utils import (altitude_from_exponential_atmosphere_density, equilibrium_glide_gamma)
-from Project.edl_control.src.nonplanar_eom import non_planar_eom, altitude_zero_event
+from edl_control.src.project_vars import STS_13_params
+from edl_control.src.project_utils import (altitude_from_exponential_atmosphere_density, equilibrium_glide_gamma)
+from edl_control.src.nonplanar_eom import non_planar_eom, altitude_zero_event
 
 rE = 6378  # km
 muE = 3.986e5  # km^3 / s^2

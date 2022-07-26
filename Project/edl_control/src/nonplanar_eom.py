@@ -6,10 +6,10 @@ from control import lqr
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-from Project.src.project_vars import EntryVehicleParams
-from Project.src.environments import (compute_density_from_altitude, compute_gravity_from_altitude,
+from edl_control.src.project_vars import EntryVehicleParams
+from edl_control.src.environments import (compute_density_from_altitude, compute_gravity_from_altitude,
                                       compute_density_std_atmosphere)
-from Project.src.project_utils import compute_desired_heading, normalize_angle
+from edl_control.src.project_utils import compute_desired_heading, normalize_angle
 
 mpl.rcParams['text.usetex'] = True
 mpl.rcParams.update({'font.size': 13})

@@ -9,26 +9,25 @@ mpl.rcParams['text.usetex'] = True
 mpl.rcParams.update({'font.size': 13})
 
 from Project.src.project_vars import STS_13_params, EntryVehicleParams
-from Project.src.project_utils import (altitude_from_exponential_atmosphere_density, equilibrium_glide_gamma,
-                                       normalize_angle, inch_to_meter)
+from Project.src.project_utils import (normalize_angle)
 
-# Load the data
+# Load the data for standard atmosphere
 x_traj_c = np.load('sts_13_controlled_entry_x.npy', allow_pickle=True)
 u_traj_c = np.load('sts_13_controlled_entry_u.npy', allow_pickle=True)
 t_traj_c = np.load('sts_13_controlled_entry_t.npy', allow_pickle=True)
 #
-# x_traj_u = np.load('sts_13_entry_x.npy', allow_pickle=True)
-# u_traj_u = np.load('sts_13_entry_u.npy', allow_pickle=True)
-# t_traj_u = np.load('sts_13_entry_t.npy', allow_pickle=True)
+x_traj_u = np.load('sts_13_entry_x.npy', allow_pickle=True)
+u_traj_u = np.load('sts_13_entry_u.npy', allow_pickle=True)
+t_traj_u = np.load('sts_13_entry_t.npy', allow_pickle=True)
 
-# Load the data
-x_traj_u = np.load('sts_13_exp_controlled_entry_x.npy', allow_pickle=True)
-u_traj_u = np.load('sts_13_exp_controlled_entry_u.npy', allow_pickle=True)
-t_traj_u = np.load('sts_13_exp_controlled_entry_t.npy', allow_pickle=True)
+# Load the data for exponential atmosphere
+x_traj_ce = np.load('sts_13_exp_controlled_entry_x.npy', allow_pickle=True)
+u_traj_ce = np.load('sts_13_exp_controlled_entry_u.npy', allow_pickle=True)
+t_traj_ce = np.load('sts_13_exp_controlled_entry_t.npy', allow_pickle=True)
 
-# x_traj_u = np.load('sts_13_exp_entry_x.npy', allow_pickle=True)
-# u_traj_u = np.load('sts_13_exp_entry_u.npy', allow_pickle=True)
-# t_traj_u = np.load('sts_13_exp_entry_t.npy', allow_pickle=True)
+x_traj_ue = np.load('sts_13_exp_entry_x.npy', allow_pickle=True)
+u_traj_ue = np.load('sts_13_exp_entry_u.npy', allow_pickle=True)
+t_traj_ue = np.load('sts_13_exp_entry_t.npy', allow_pickle=True)
 
 
 # Create a new plot of the world
@@ -62,30 +61,57 @@ def plot_ground_track(axis, x_traj, label, color=None, alpha=0.002):
                      alpha=alpha, color=color)
 
 
-def draw_error_band(ax, x, y, err, **kwargs):
-    # Calculate normals via centered finite differences (except the first point
-    # which uses a forward difference and the last point which uses a backward
-    # difference).
-    dx = np.concatenate([[x[1] - x[0]], x[2:] - x[:-2], [x[-1] - x[-2]]])
-    dy = np.concatenate([[y[1] - y[0]], y[2:] - y[:-2], [y[-1] - y[-2]]])
-    l = np.hypot(dx, dy)
-    nx = dy / l
-    ny = -dx / l
+def compute_terminal_error(x_traj, position_desired):
+    num_samples = x_traj.shape[0]
+    x_position_final = np.zeros((2, num_samples))
+    for i in range(num_samples):
+        x_position_final[:,i] = x_traj[i][4:,-1]
 
-    # end points of errors
-    xp = x + nx * err
-    yp = y + ny * err
-    xn = x - nx * err
-    yn = y - ny * err
+    diff = np.sqrt(np.sum((np.degrees(x_position_final.T) - np.degrees(position_desired))**2, 1))
+    mean_diff = np.mean(diff)
+    std_diff = np.std(diff)
 
-    vertices = np.block([[xp, xn[::-1]],
-                         [yp, yn[::-1]]]).T
-    codes = np.full(len(vertices), Path.LINETO)
-    codes[0] = codes[len(xp)] = Path.MOVETO
-    path = Path(vertices, codes)
-    ax.add_patch(PathPatch(path, **kwargs))
+    return mean_diff, std_diff
 
 
+def plot_alt_vel(axis, x_traj, color):
+    for i in range(1, x_traj.shape[0]):
+        x = x_traj[i]
+        axis.plot(x[0] / 1000, x[2] / 1000, linestyle='--', linewidth=2, alpha=0.5, color=color)
+
+
+def plot_vec(axis, t_traj, x_traj, idx, ylabel, color, label, scale=True):
+    ax.set_xlabel(r'Time ($s$)')
+    ax.set_ylabel(ylabel)
+    for i in range(1, x_traj.shape[0]):
+        t = t_traj[i]
+        x = x_traj[i]
+        if scale:
+            x = x/1000
+        else:
+            x = np.degrees(x)
+        axis.plot(t, x[idx], linestyle='-', linewidth=2, alpha=0.3, color=color, label=label)
+
+
+
+# Compute Errors WRT final position
+mean_c, std_c = compute_terminal_error(x_traj_c, STS_13_params.desired_position)
+mean_u, std_u = compute_terminal_error(x_traj_u, STS_13_params.desired_position)
+
+mean_ce, std_ce = compute_terminal_error(x_traj_ce, STS_13_params.desired_position)
+mean_ue, std_ue = compute_terminal_error(x_traj_ue, STS_13_params.desired_position)
+
+print("Controlled Mean Terminal Error:", mean_c)
+print("UnControlled Mean Terminal Error:", mean_u)
+print("Controlled Std Terminal Error:", std_c)
+print("UnControlled Std Terminal Error:", std_u)
+
+print("Exp Controlled Mean Terminal Error:", mean_ce)
+print("Exp UnControlled Mean Terminal Error:", mean_ue)
+print("Exp Controlled Std Terminal Error:", std_ce)
+print("Exp UnControlled Std Terminal Error:", std_ue)
+
+# Plot and compare ground tracks
 gt1_fig, gt1_axes = plot_earth(STS_13_params)
 gt2_fig, gt2_axes = plot_earth(STS_13_params)
 
@@ -103,4 +129,42 @@ gt1_axes.set_ylim(25,50)
 
 gt2_axes.set_xlim(-125,-100)
 gt2_axes.set_ylim(25,50)
+
+fig, ax = plt.subplots()
+plot_alt_vel(ax, x_traj_u, 'g')
+plot_alt_vel(ax, x_traj_c, 'b')
+plt.grid()
+plt.tight_layout()
+
+fig, ax = plt.subplots()
+plot_vec(ax, t_traj_u, x_traj_u, 0, r'Velocity ($\frac{km}{s})$', 'g', 'Uncontrolled')
+plot_vec(ax, t_traj_c, x_traj_c, 0, r'Velocity ($\frac{km}{s})$', 'b', 'Controlled')
+plt.grid()
+plt.tight_layout()
+
+fig, ax = plt.subplots()
+plot_vec(ax, t_traj_u, x_traj_u, 1, r'Flight Path Angle ($^\circ$)', 'g', 'Uncontrolled', False)
+plot_vec(ax, t_traj_c, x_traj_c, 1, r'Flight Path Angle ($^\circ$)', 'b', 'Controlled', False)
+ax.plot(np.arange(0,2500), -90*np.ones(2500), 'r')
+ax.set_ylim(-95,10)
+plt.grid()
+plt.tight_layout()
+
+fig, ax = plt.subplots()
+plot_vec(ax, t_traj_c, u_traj_c, 0, r'Roll Angle ($^\circ$)', 'b', 'Controlled', False)
+ax.plot(np.arange(0,2000), 90*np.ones(2000), 'r')
+ax.plot(np.arange(0,2000), -90*np.ones(2000), 'r')
+plt.grid()
+plt.tight_layout()
+
+fig, ax = plt.subplots()
+plot_vec(ax, t_traj_c, u_traj_c*1000, 1, r'$\frac{L}{D}$', 'b', 'Controlled', True)
+ax.plot(np.arange(0,2000), STS_13_params.lift_drag_ratio*np.ones(2000), 'r')
+ax.plot(np.arange(0,2000), 0*np.ones(2000), 'r')
+# plot_vec(ax, t_traj_c, u_traj_c, 0, r'Roll Angle ($^\circ$)', 'b', 'Controlled', False)
+# ax.set_ylim(-95,10)
+plt.grid()
+plt.tight_layout()
+
+
 plt.show()
